@@ -17,9 +17,16 @@
             </div>
 
             <div class="mb-3">
-                <label for="image" class="form-label">Image</label>
-                <input type="file" name="image" class="form-control">
-                <img src="/images/posts/{{ $post->image }}" class="img-fluid mt-2" alt="{{ $post->title }}">
+                <label for="images" class="form-label">Images</label>
+                <input type="file" name="images[]" class="form-control" multiple required>
+                {{-- <img src="/images/posts/{{ $post->image }}" class="img-fluid mt-2" alt="{{ $post->title }}"> --}}
+                <div class="mt-2">
+                    @foreach ($post->images as $image)
+                        <img src="/images/posts/{{ $image }}" class="img-fluid mt-2" alt="{{ $post->title }}"
+                            style="max-width: 100px;">
+                    @endforeach
+                </div>
+
             </div>
 
             <button type="submit" class="btn btn-warning">Update</button>

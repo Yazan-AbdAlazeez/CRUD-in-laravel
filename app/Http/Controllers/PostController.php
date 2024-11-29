@@ -33,16 +33,21 @@ class PostController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-        if ($request->hasFile('image')) {
-            $imageName = $request->file("image")->getClientOriginalName() . "." . time() . $request->file("image")->getClientOriginalExtension();
-            $request->file("image")->move(public_path("/images/posts"), $imageName);
+
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imageName = $image->getClientOriginalName() . "." . time() . $image->getClientOriginalExtension();
+                $image->move(public_path("/images/posts"), $imageName);
+                $imagePaths[] =  $imageName;
+            }
         }
         Post::create([
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $imageName,
+            'images' => $imagePaths,
         ]);
         return redirect()->route('posts.index');
     }
@@ -66,24 +71,41 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-
     public function update(Request $request, Post $post)
     {
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'image' => 'image|mimes:jpg,png,jpeg|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $imageName = $request->file("image")->getClientOriginalName() . "." . time() . $request->file("image")->getClientOriginalExtension();
-            $request->file("image")->move(public_path("/images/posts"), $imageName);
-            $post->image = $imageName;
+        // Delete old images from the server
+        foreach ($post->images as $oldImage) {
+            $oldImagePath = public_path('/images/posts/' . $oldImage);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath); // Delete the old image file
+            }
         }
 
-        $post->title = $request->title;
-        $post->description = $request->description;
-        $post->save();
+        // Initialize an array for new image paths
+        $imagePaths = [];
+
+        // Check if new images are uploaded
+        if ($request->hasFile('images')) {
+            // Loop through each uploaded image
+            foreach ($request->file('images') as $image) {
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('/images/posts'), $imageName);
+                $imagePaths[] = $imageName; // Store the new image name in the array
+            }
+        }
+
+        // Update the post with new images, replacing any existing images
+        $post->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'images' => $imagePaths, // Store new images as JSON
+        ]);
 
         return redirect()->route('posts.index');
     }
