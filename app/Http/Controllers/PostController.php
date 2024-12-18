@@ -79,32 +79,26 @@ class PostController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Delete old images from the server
         foreach ($post->images as $oldImage) {
             $oldImagePath = public_path('/images/posts/' . $oldImage);
             if (file_exists($oldImagePath)) {
-                unlink($oldImagePath); // Delete the old image file
+                unlink($oldImagePath);
             }
         }
 
-        // Initialize an array for new image paths
         $imagePaths = [];
-
-        // Check if new images are uploaded
         if ($request->hasFile('images')) {
-            // Loop through each uploaded image
             foreach ($request->file('images') as $image) {
                 $imageName = time() . '_' . $image->getClientOriginalName();
                 $image->move(public_path('/images/posts'), $imageName);
-                $imagePaths[] = $imageName; // Store the new image name in the array
+                $imagePaths[] = $imageName;
             }
         }
 
-        // Update the post with new images, replacing any existing images
         $post->update([
             'title' => $request->title,
             'description' => $request->description,
-            'images' => $imagePaths, // Store new images as JSON
+            'images' => $imagePaths,
         ]);
 
         return redirect()->route('posts.index');
