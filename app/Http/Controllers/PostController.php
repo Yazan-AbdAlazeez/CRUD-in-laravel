@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Post;
 use Illuminate\Http\Request;
-
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class PostController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
@@ -109,7 +111,16 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize("manageuser", User::class);
         $post->delete();
         return redirect()->route('posts.index');
+    }
+
+    public function destroyAll()
+    {
+        $this->authorize("manageuser", User::class);
+        Post::query()->delete();  
+        return redirect()->route('posts.index');
+        
     }
 }

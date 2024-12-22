@@ -9,10 +9,6 @@
 </head>
 
 <body>
-    <div class="container mt-4">
-        <button type="button" class="btn btn-dark" onclick="window.location='{{ route('posts.index') }}'">Post
-            Management</button>
-    </div>
     <div class="content mt-3">
         @yield('content')
     </div>

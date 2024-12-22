@@ -2,8 +2,25 @@
 
 @section('content')
     <div class="container">
+        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
+        @can('manageuser')
+            <form action="{{ route('users.index') }}" method="Get" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-warning">users</button>
+            </form>
+        @endcan
         <h1>Posts</h1>
         <a href="{{ route('posts.create') }}" class="btn btn-primary">Create Post</a>
+        @can('manageuser')
+            <form action="{{ route('posts.destroyAll') }}" method="POST" style="display:inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Delete All Posts</button>
+            </form>
+        @endcan
         <div class="row mt-3">
             @forelse ($posts as $post)
                 <div class="col-md-4 mb-3">
@@ -26,6 +43,7 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
+
                         </div>
                     </div>
                 </div>
